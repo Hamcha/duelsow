@@ -1,8 +1,6 @@
 /* eslint strict: 0 */
 const webpack = require("webpack");
-const baseConfig = require("./webpack.config.common");
-
-const config = Object.create(baseConfig);
+const config = require("./webpack.config.common")(true);
 config.debug = true;
 config.devtool = "cheap-module-eval-source-map";
 

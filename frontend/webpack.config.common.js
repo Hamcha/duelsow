@@ -1,5 +1,6 @@
 /* eslint strict: 0 */
 const path = require("path");
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 const buildQS = function(props) {
 	"use strict";
@@ -17,39 +18,47 @@ const babelcmd = "babel?" + buildQS({
 	]
 });
 
-module.exports = {
-	babelcmd: babelcmd,
-	module: {
-		loaders: [{
-			test: /\.js$/,
-			loaders: [babelcmd],
-			exclude: /node_modules/
-		},{
-			test: /\.eot|.otf|.woff|\.ttf/,
-			loader: "file"
-		},{
-			test: /\.scss$/,
-			loaders: [
-				"style",
-				"css",
-				"sass?sourceMap"
-			]
-		}, {
-			test: /\.css$/,
-			loaders: [
-				"style",
-				"css"
-			]
-		}]
-	},
-	output: {
-		path: path.join(__dirname, "dist"),
-		filename: "bundle.js"
-	},
-	resolve: {
-		extensions: ["", ".js"],
-		packageMains: ["webpack", "browser", "web", "browserify", ["jam", "main"], "main"]
-	},
-	plugins: [],
-	externals: []
+module.exports = function(liveCSS) {
+	var plugins = [];
+	var cssloader = {
+		test: /\.css$/
+	};
+	var scssloader = {
+		test: /\.scss$/
+	};
+
+	if (liveCSS) {
+		cssloader.loaders = ["style", "css"];
+		scssloader.loaders = ["style", "css", "sass?sourceMap"];
+	} else {
+		cssloader.loader = ExtractTextPlugin.extract("css");
+		scssloader.loader = ExtractTextPlugin.extract(["css", "sass?sourceMap"]);
+		plugins.push(new ExtractTextPlugin("style.css"));
+	}
+
+	return {
+		babelcmd: babelcmd,
+		module: {
+			loaders: [{
+				test: /\.js$/,
+				loaders: [babelcmd],
+				exclude: /node_modules/
+			},{
+				test: /\.eot|.otf|.woff|\.ttf/,
+				loader: "file"
+			},
+			cssloader,
+			scssloader]
+		},
+		output: {
+			path: path.join(__dirname, "dist"),
+			filename: "bundle.js"
+		},
+		resolve: {
+			extensions: ["", ".js"],
+			packageMains: ["webpack", "browser", "web", "browserify", ["jam", "main"], "main"]
+		},
+		plugins: plugins,
+		externals: []
+	};
 };
