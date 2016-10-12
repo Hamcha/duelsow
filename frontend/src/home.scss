@@ -1,0 +1,30 @@
+// Full page, no margin
+html, body {
+	height: 100%;
+	margin: 0;
+}
+
+body {
+	background: linear-gradient(#234, #012);
+	font-family: "Raleway", sans-serif;
+	color: white;
+}
+
+#wswbg {
+	position: fixed; z-index: -1;
+	top: 0; bottom: 0; left: 0; right: 0;
+	opacity: 0.15;
+	background-position: middle center;
+}
+
+main {
+	width: 100%; height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+h2 {
+	margin: 1em;
+}

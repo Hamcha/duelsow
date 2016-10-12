@@ -1,0 +1,29 @@
+{
+  "name": "Duelsow-frontend",
+  "version": "0.0.1",
+  "main": "main.js",
+  "license": "UNLICENSED",
+  "scripts": {
+    "hot-server": "webpack-dev-server --watch --config webpack.config.dev.js --progress --colors --display-error-details --content-base . --host 0.0.0.0 --port 3000 --hot",
+    "build": "webpack --config webpack.config.production.js --progress --profile --colors"
+  },
+  "dependencies": {
+    "babel": "*",
+    "babel-core": "*",
+    "babel-eslint": "*",
+    "babel-loader": "*",
+    "babel-preset-es2015": "*",
+    "babel-preset-stage-0": "*",
+    "css-loader": "*",
+    "extract-text-webpack-plugin": "^1.0.1",
+    "file-loader": "*",
+    "node-sass": "*",
+    "sass-loader": "*",
+    "style-loader": "*",
+    "superagent": "^1.8.3",
+    "webpack": "*"
+  },
+  "devDependencies": {
+    "webpack-dev-server": "*"
+  }
+}
