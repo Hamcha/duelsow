@@ -1,6 +1,6 @@
 import "./home.scss";
 
-const BGCount = 4;
+const BGCount = 9;
 
 let currentBG = (Math.random() * BGCount)|0;
 let bgPath = `res/backgrounds/${currentBG}.jpg`;
