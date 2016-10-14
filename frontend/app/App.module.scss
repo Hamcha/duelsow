@@ -34,4 +34,16 @@ header {
 		text-align: center;
 		margin: 1rem;
 	}
+
+
+	div.currentPlayerInfo {
+		.currentPlayerName {
+			margin: 5pt 0 2pt 0; padding: 0;
+			font-size: 12pt;
+			font-weight: bold;
+		}
+		.currentPlayerRank {
+			color: #bbb;
+		}
+	}
 }
