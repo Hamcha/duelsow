@@ -1,6 +1,5 @@
 /* eslint strict: 0 */
 const path = require("path");
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 const buildQS = function(props) {
 	"use strict";
@@ -13,52 +12,59 @@ const buildQS = function(props) {
 
 const babelcmd = "babel?" + buildQS({
 	presets: [
+		"react",
 		"es2015",
 		"stage-0"
+	],
+	plugins: [
+		"transform-decorators-legacy"
 	]
 });
 
-module.exports = function(liveCSS) {
-	var plugins = [];
-	var cssloader = {
-		test: /\.css$/
-	};
-	var scssloader = {
-		test: /\.scss$/
-	};
+module.exports = {
+	babelcmd: babelcmd,
+	module: {
+		loaders: [{
+			test: /\.jsx?$/,
+			loaders: [babelcmd],
+			exclude: /node_modules/
+		},{
+			test: /\.eot|.otf|.woff|\.ttf/,
+			loader: "file"
+		},{
+			test: /^((?!\.module).)*\.scss$/,
+			loaders: [
+				"style",
+				"css",
+				"sass?sourceMap"
+			]
+		}, {
+			test: /\.module\.scss$/,
+			loaders: [
+				"style",
+				"css?modules&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]!",
+				"sass?sourceMap"
+			]
+		}, {
+			test: /\.css$/,
+			loaders: [
+				"style",
+				"css"
+			]
+		}]
+	},
+	output: {
+		path: path.join(__dirname, "dist"),
+		filename: "bundle.js"
+	},
+	resolve: {
+		extensions: ["", ".js", ".jsx"],
+		packageMains: ["webpack", "browser", "web", "browserify", ["jam", "main"], "main"]
+	},
+	plugins: [
 
-	if (liveCSS) {
-		cssloader.loaders = ["style", "css"];
-		scssloader.loaders = ["style", "css", "sass?sourceMap"];
-	} else {
-		cssloader.loader = ExtractTextPlugin.extract("css");
-		scssloader.loader = ExtractTextPlugin.extract(["css", "sass?sourceMap"]);
-		plugins.push(new ExtractTextPlugin("style.css"));
-	}
-
-	return {
-		babelcmd: babelcmd,
-		module: {
-			loaders: [{
-				test: /\.js$/,
-				loaders: [babelcmd],
-				exclude: /node_modules/
-			},{
-				test: /\.eot|.otf|.woff|\.ttf/,
-				loader: "file"
-			},
-			cssloader,
-			scssloader]
-		},
-		output: {
-			path: path.join(__dirname, "dist"),
-			filename: "bundle.js"
-		},
-		resolve: {
-			extensions: ["", ".js"],
-			packageMains: ["webpack", "browser", "web", "browserify", ["jam", "main"], "main"]
-		},
-		plugins: plugins,
-		externals: []
-	};
+	],
+	externals: [
+		// put your node 3rd party libraries which can"t be built with webpack here (mysql, mongodb, and so on..)
+	]
 };

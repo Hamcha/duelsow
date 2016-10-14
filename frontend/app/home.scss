@@ -1,0 +1,28 @@
+// Full page, no margin
+html, body {
+	height: 100%;
+	margin: 0;
+}
+
+body {
+	background: linear-gradient(#234, #012);
+	font-family: "Raleway", sans-serif;
+	color: white;
+	font-size: 11pt;
+}
+
+#app {
+	height: 100%;
+}
+
+footer {
+	position: fixed;
+	left: 5pt; right: 5pt;
+	bottom: 5pt;
+	font-size: 8.5pt;
+	text-align: center;
+}
+
+a, a:visited {
+	color: #eee;
+}

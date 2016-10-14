@@ -1,0 +1,37 @@
+main {
+	width: 100%; max-width: 920px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	margin: 0 auto;
+}
+
+h2 {
+	margin: 1em;
+}
+
+header {
+	margin-bottom: 2rem;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	& > * {
+		flex: 1;
+	}
+
+	div.playerSummary {
+		text-align: right;
+
+		span.playerCount {
+			font-size: 1.1em;
+			font-weight: bold;
+		}
+	}
+	div.logo {
+		text-align: center;
+		margin: 1rem;
+	}
+}
