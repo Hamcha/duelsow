@@ -1,34 +1,71 @@
 /* @flow */
 
 import React from "react";
-import { connect } from "react-redux";
 
 import styles from "./App.module.scss";
 
-import type State from "./reducers";
+type PlayerRank = "RankNewbee" | "RankAverage" | "RankGood" | "RankMaster";
 
-class App extends React.Component {
-	static reduxMap(state: State): Object {
+type PlayerData = {
+	signedIn: bool,
+	name: string,
+	rank: PlayerRank
+};
+
+type PlayerStats = {
+	connected: number,
+	available: number
+};
+
+class PlayerInfoWidget extends React.Component {
+	static propTypes: Object = {
+		playerData: React.PropTypes.object
 	}
+	defaultProps: Object = {
+		playerData: { signedIn: false }
+	};
 	render(): any {
-		return <main role="main">
-			<header>
-				<div className={styles.playerSummary}>
-					<span className={styles.playerCount}>#</span> players connected<br />
-					<span className={styles.playerCount}>#</span> players available for dueling
-				</div>
-				<div className={styles.logo}><img src="res/duesow-logo.svg" width="200px" /></div>
-				<div className={styles.currentPlayerInfo}>
-					Signed in as:
-					<div className={styles.currentPlayerName}>PlayerName</div>
-					<div className={styles.currentPlayerRank}>PlayerRank</div>
-				</div>
-			</header>
-			<section style={{"height": "250px", "border":"1px solid grey", "width": "600px"}}>
-				TODO
-			</section>
-		</main>;
+		const ranks: {[key: PlayerRank]: string} = {
+			RankNewbee: "Newbee",
+			RankAverage:"Average",
+			RankGood:   "Good",
+			RankMaster: "Master"
+		};
+		if (!this.props.playerData.signedIn) {
+			return <div className={styles.currentPlayerInfo}>Not signed in</div>;
+		}
+		return <div className={styles.currentPlayerInfo}>
+			<div className={styles.currentPlayerName}>{this.props.playerData.name}</div>
+			<div className={styles.currentPlayerRank}>{ranks[this.props.playerData.rank]}</div>
+		</div>;
 	}
 }
 
-export default connect(App.reduxMap)(App);
+class PlayerStatWidget extends React.Component {
+	state: Object = {
+		waiting:     true,
+		playerStats: {}
+	}
+	render(): any {
+		if (this.state.waiting) {
+			return <div className={styles.playerSummary}>Loading summary…</div>;
+		}
+		return <div className={styles.playerSummary}>
+			<span className={styles.playerCount}>{this.state.playerStats.connected}</span> players connected<br />
+			<span className={styles.playerCount}>{this.state.playerStats.available}</span> available for dueling
+		</div>;
+	}
+}
+
+export default class App extends React.Component {
+	render(): any {
+		let data: PlayerData = {};
+		return <main role="main">
+			<header>
+				<PlayerStatWidget />
+				<div className={styles.logo}><img src="res/duesow-logo.svg" /></div>
+				<PlayerInfoWidget playerData={data} />
+			</header>
+		</main>;
+	}
+}
