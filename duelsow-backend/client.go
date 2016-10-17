@@ -34,7 +34,7 @@ func handleClient(conn *websocket.Conn) {
 		var message ClientMessage
 		err := conn.ReadJSON(&message)
 		if err != nil {
-			if !websocket.IsCloseError(err) {
+			if !websocket.IsCloseError(err) || !websocket.IsUnexpectedCloseError(err) {
 				fmt.Println(err)
 				conn.WriteJSON(ServerMessage{
 					OK:           false,

@@ -18,10 +18,12 @@ type PlayerStats = {
 	available: number
 };
 
+const StatPollInterval: number = 5000;
+
 class PlayerInfoWidget extends React.Component {
 	static propTypes: Object = {
 		playerData: React.PropTypes.object
-	}
+	};
 
 	defaultProps: Object = {
 		playerData: { signedIn: false }
@@ -45,12 +47,34 @@ class PlayerInfoWidget extends React.Component {
 }
 
 class PlayerStatWidget extends React.Component {
+	static propTypes: Object = {
+		client: React.PropTypes.instanceOf(DSClient).isRequired
+	}
+
 	state: {
 		waiting:     bool,
 		playerStats: PlayerStats,
 	} = {
 		waiting:     true,
 		playerStats: {}
+	};
+
+	pollerId: ?number = null;
+
+	pollStats(): void {
+		//TODO
+	}
+
+	componentWillMount(): void {
+		// Add polling
+		this.pollerId = window.setInterval(this.pollStats.bind(this), StatPollInterval);
+	}
+
+	componentWillUnmount(): void {
+		// Remove polling
+		if (this.pollerId !== null) {
+			window.clearInterval(this.pollerId);
+		}
 	}
 
 	render(): any {
@@ -103,7 +127,7 @@ export default class App extends React.Component {
 		}
 		return <main role="main">
 			<header>
-				<PlayerStatWidget />
+				<PlayerStatWidget client={this.props.client} />
 				<div className={styles.logo}><img src="res/duesow-logo.svg" /></div>
 				<PlayerInfoWidget playerData={data} />
 			</header>
