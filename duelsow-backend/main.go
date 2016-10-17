@@ -18,6 +18,8 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+var hub Hub
+
 func main() {
 	bind := flag.String("bind", ":7331", "Address:port to bind to")
 	flag.Parse()

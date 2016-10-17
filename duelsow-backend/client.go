@@ -29,6 +29,7 @@ func handleClient(conn *websocket.Conn) {
 		conn:     conn,
 		SignedIn: false,
 	}
+	defer client.Cleanup()
 
 	for {
 		var message ClientMessage
@@ -63,5 +64,12 @@ func (c *Client) HandleMessage(message ClientMessage) {
 				Message:   fmt.Sprintf("Command not recognized: %s", message.ActionType),
 			},
 		})
+	}
+}
+
+func (c *Client) Cleanup() {
+	// Remove client from hub before destroying it
+	if c.SignedIn {
+		hub.RemoveClient(c)
 	}
 }
