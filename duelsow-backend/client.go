@@ -6,6 +6,14 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type Client struct {
+	conn *websocket.Conn
+
+	SignedIn  bool
+	Info      PlayerInfo
+	Available bool
+}
+
 var greetingData = ServerGreetingData{
 	APIVersion: APIVersionNumber,
 }
@@ -16,6 +24,11 @@ func handleClient(conn *websocket.Conn) {
 		ResponseType: SRTGreeting,
 		Data:         greetingData,
 	})
+
+	client := Client{
+		conn:     conn,
+		SignedIn: false,
+	}
 
 	for {
 		var message ClientMessage
@@ -35,16 +48,20 @@ func handleClient(conn *websocket.Conn) {
 			return
 		}
 
-		switch message.ActionType {
-		default:
-			conn.WriteJSON(ServerMessage{
-				OK:           false,
-				ResponseType: SRTCmdError,
-				Error: &ServerError{
-					ErrorType: SETUnknownCmd,
-					Message:   fmt.Sprintf("Command not recognized: %s", message.ActionType),
-				},
-			})
-		}
+		client.HandleMessage(message)
+	}
+}
+
+func (c *Client) HandleMessage(message ClientMessage) {
+	switch message.ActionType {
+	default:
+		c.conn.WriteJSON(ServerMessage{
+			OK:           false,
+			ResponseType: SRTCmdError,
+			Error: &ServerError{
+				ErrorType: SETUnknownCmd,
+				Message:   fmt.Sprintf("Command not recognized: %s", message.ActionType),
+			},
+		})
 	}
 }
