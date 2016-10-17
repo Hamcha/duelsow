@@ -1,6 +1,7 @@
 /* @flow */
 
-import React from "react";
+import React    from "react";
+import DSClient from "./DSClient";
 
 import styles from "./App.module.scss";
 
@@ -21,9 +22,11 @@ class PlayerInfoWidget extends React.Component {
 	static propTypes: Object = {
 		playerData: React.PropTypes.object
 	}
+
 	defaultProps: Object = {
 		playerData: { signedIn: false }
 	};
+
 	render(): any {
 		const ranks: {[key: PlayerRank]: string} = {
 			RankNewbee: "Newbee",
@@ -42,10 +45,14 @@ class PlayerInfoWidget extends React.Component {
 }
 
 class PlayerStatWidget extends React.Component {
-	state: Object = {
+	state: {
+		waiting:     bool,
+		playerStats: PlayerStats,
+	} = {
 		waiting:     true,
 		playerStats: {}
 	}
+
 	render(): any {
 		if (this.state.waiting) {
 			return <div className={styles.playerSummary}>Loading summary…</div>;
@@ -58,14 +65,50 @@ class PlayerStatWidget extends React.Component {
 }
 
 export default class App extends React.Component {
+	static propTypes: Object = {
+		client: React.PropTypes.instanceOf(DSClient).isRequired
+	}
+
+	state: {
+		waiting: bool
+	} = {
+		waiting: true
+	};
+
+	// Checks DSClient connection status to see if we have connected
+	// to Duelsow's backend server.
+	// If yes, set "waiting" to false, otherwise setup a callback.
+	checkDSClientStatus(): void {
+		// Create a function to remove the "waiting" state
+		let remWaitFn: () => void = this.setState.bind(this, { waiting: false }, undefined);
+
+		if (this.props.client.isConnected()) {
+			remWaitFn();
+		} else {
+			this.props.client.addEventListener(DSClient.CONNECTED, remWaitFn);
+		}
+	}
+
+	componentWillMount(): void {
+		this.checkDSClientStatus();
+	}
+
 	render(): any {
 		let data: PlayerData = {};
+		if (this.state.waiting) {
+			return <main role="main">
+				<img src="res/duesow-logo.svg" style={{"width": "250px"}} />
+				<h1>Connecting, please wait…</h1>
+			</main>;
+		}
 		return <main role="main">
 			<header>
 				<PlayerStatWidget />
 				<div className={styles.logo}><img src="res/duesow-logo.svg" /></div>
 				<PlayerInfoWidget playerData={data} />
 			</header>
+			<section>
+			</section>
 		</main>;
 	}
 }

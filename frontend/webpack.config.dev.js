@@ -4,7 +4,7 @@ const baseConfig = require("./webpack.config.common");
 
 const config = Object.create(baseConfig);
 config.debug = true;
-config.devtool = "cheap-module-eval-source-map";
+config.devtool = "eval-source-map";
 
 console.log("[Development config] Adding hot-reload entrypoints");
 config.entry = [
