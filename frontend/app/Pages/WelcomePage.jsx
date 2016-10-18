@@ -5,6 +5,19 @@ import React from "react";
 import styles from "./WelcomePage.module.scss";
 
 export default class WelcomePage extends React.Component {
+	checkValidity(): void {
+		let form: HTMLFormElement = document.forms.signin;
+		let valid: boolean = form.rank.value !== "" && form.nickname.value !== "";
+		document.getElementById("signin").disabled = !valid;
+	}
+	signIn(e: Event): void {
+		e.preventDefault();
+		let form: HTMLFormElement = document.forms.signin;
+		let playerName: string = form.nickname.value;
+		let playerRank: string = form.rank.value;
+		console.log(playerName);
+		console.log(playerRank);
+	}
 	render(): any {
 		return <section>
 			<h1>Welcome to Duelsow</h1>
@@ -12,6 +25,7 @@ export default class WelcomePage extends React.Component {
 			<p className={styles.copy}>After you sign in, you can see the list of connected players, their rank and status (available or not).<br />If you don't find anyone to play with you can keep this website open in the background while doing other things to show that you are available for playing. You will receive a browser notification (just be sure to allow Duelsow to send them when the prompt will appear) as soon as someone requests to play with you!</p>
 			<p className={styles.copy}>When you are ready, fill the form below and sign in!</p>
 			<div className={styles.signInForm}>
+				<form name="signin" onSubmit={this.signIn.bind(this)}>
 				<table>
 					<thead>
 						<tr>
@@ -22,21 +36,22 @@ export default class WelcomePage extends React.Component {
 					</thead>
 					<tbody>
 						<tr>
-							<td width="45%"><input type="text" name="nickname" z-index="1" /></td>
+							<td width="45%"><input required type="text" name="nickname" onChange={this.checkValidity.bind(this)} /></td>
 							<td className={styles.rankRow}>
-								<input type="radio" name="rank" id="RankNewbee" />
+								<input required type="radio" name="rank" value="RankNewbee" id="RankNewbee" onChange={this.checkValidity.bind(this)} />
 								<label htmlFor="RankNewbee" className={styles.rankOption}>Newbee</label>
-								<input type="radio" name="rank" id="RankAverage" />
+								<input type="radio" name="rank" value="RankAverage" id="RankAverage" onChange={this.checkValidity.bind(this)} />
 								<label htmlFor="RankAverage" className={styles.rankOption}>Average</label>
-								<input type="radio" name="rank" id="RankGood" />
+								<input type="radio" name="rank" value="RankGood" id="RankGood" onChange={this.checkValidity.bind(this)} />
 								<label htmlFor="RankGood" className={styles.rankOption}>Very Good</label>
-								<input type="radio" name="rank" id="RankMaster" />
+								<input type="radio" name="rank" value="RankMaster" id="RankMaster" onChange={this.checkValidity.bind(this)} />
 								<label htmlFor="RankMaster" className={styles.rankOption}>Master</label>
 							</td>
-							<td width="20%"><button z-index="4">Sign in</button></td>
+							<td width="20%"><button id="signin" disabled>Sign in</button></td>
 						</tr>
 					</tbody>
 				</table>
+				</form>
 			</div>
 		</section>;
 	}
