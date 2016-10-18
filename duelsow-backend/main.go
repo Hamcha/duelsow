@@ -11,14 +11,14 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
-	Subprotocols:    []string{CurrentAPIVersion},
+	Subprotocols:    []string{"ds-wsapi"},
 	CheckOrigin: func(r *http.Request) bool {
 		// No constraints on origin for now
 		return true
 	},
 }
 
-var hub Hub
+var hub = NewHub()
 
 func main() {
 	bind := flag.String("bind", ":7331", "Address:port to bind to")

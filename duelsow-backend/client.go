@@ -10,19 +10,18 @@ type Client struct {
 	conn *websocket.Conn
 
 	SignedIn  bool
+	ClientId  int
 	Info      PlayerInfo
 	Available bool
-}
-
-var greetingData = ServerGreetingData{
-	APIVersion: APIVersionNumber,
 }
 
 func handleClient(conn *websocket.Conn) {
 	conn.WriteJSON(ServerMessage{
 		OK:           true,
 		ResponseType: SRTGreeting,
-		Data:         greetingData,
+		Data: ServerGreetingData{
+			Rooms: hub.RoomList(),
+		},
 	})
 
 	client := Client{
@@ -55,6 +54,13 @@ func handleClient(conn *websocket.Conn) {
 
 func (c *Client) HandleMessage(message ClientMessage) {
 	switch message.ActionType {
+	case CATStats:
+		c.conn.WriteJSON(ServerMessage{
+			OK:           true,
+			ResponseType: SRTStats,
+			ReplyTag:     &message.Tag,
+			Data:         hub.Stats(),
+		})
 	default:
 		c.conn.WriteJSON(ServerMessage{
 			OK:           false,

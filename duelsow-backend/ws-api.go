@@ -1,15 +1,5 @@
 package main
 
-import "fmt"
-
-//
-// DS-API Metadata
-//
-
-const APIVersionNumber = 1
-
-var CurrentAPIVersion = fmt.Sprintf("dsapi-%d", APIVersionNumber)
-
 //
 // Client requests struct/infos
 //
@@ -17,11 +7,18 @@ var CurrentAPIVersion = fmt.Sprintf("dsapi-%d", APIVersionNumber)
 type ClientActionType string
 
 const (
+	// Hub/Auth actions
 	CATLogIn  ClientActionType = "login"
 	CATLogOut ClientActionType = "logout"
+	CATStats  ClientActionType = "stats"
+
+	// Room actions
+	CATRoomJoin ClientActionType = "room-join"
+	CATRoomPart ClientActionType = "room-part"
 )
 
 type ClientMessage struct {
+	Tag        string
 	ActionType ClientActionType
 	Params     interface{}
 }
@@ -42,7 +39,13 @@ type LoginParams struct {
 type ServerResponseType string
 
 const (
-	SRTGreeting   ServerResponseType = "greet"
+	// Server messages
+	SRTGreeting ServerResponseType = "greet"
+	SRTRoomJoin ServerResponseType = "room-join"
+	SRTRoomPart ServerResponseType = "room-part"
+	SRTStats    ServerResponseType = "stats"
+
+	// Errors
 	SRTCmdError   ServerResponseType = "error-cmd"
 	SRTFatalError ServerResponseType = "error-fatal"
 )
@@ -55,10 +58,12 @@ const (
 )
 
 type ServerMessage struct {
-	OK           bool
-	ResponseType ServerResponseType
-	Data         interface{}
-	Error        *ServerError
+	ResponseType  ServerResponseType
+	OK            bool         `json:",omitempty"`
+	ReplyTag      *string      `json:",omitempty"`
+	MessageSource *string      `json:",omitempty"`
+	Data          interface{}  `json:",omitempty"`
+	Error         *ServerError `json:",omitempty"`
 }
 
 type ServerError struct {
@@ -67,5 +72,19 @@ type ServerError struct {
 }
 
 type ServerGreetingData struct {
-	APIVersion int
+	Rooms []string
+}
+
+type ServerStatsData struct {
+	ClientsTotal     int
+	ClientsAvailable int
+}
+
+type ServerRoomJoinData struct {
+	ClientId int
+	Player   PlayerInfo
+}
+
+type ServerRoomPartData struct {
+	ClientId int
 }

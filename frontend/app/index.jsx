@@ -2,6 +2,9 @@
 
 import "./home.scss";
 
+// Enable debug on local test environment
+window.DEBUG = location.hostname === "localhost";
+
 // Random background
 import Background from "./Background";
 window.Background = new Background(true);

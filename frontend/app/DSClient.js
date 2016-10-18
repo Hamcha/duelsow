@@ -2,8 +2,6 @@
 
 import EventTargetClass from "./Utils/EventTargetClass";
 
-const APIVersion: number = 1;
-
 //
 // Client request struct/infos
 //
@@ -11,6 +9,7 @@ const APIVersion: number = 1;
 export type ClientActionType = string;
 
 export type ClientMessage = {
+	Tag:        string,
 	ActionType: ClientActionType,
 	Params:     any
 };
@@ -20,10 +19,12 @@ export type ClientMessage = {
 //
 
 export type ServerMessage = {
-	OK:           bool,
-	ResponseType: ServerResponseType,
-	Data:         any,
-	Error:        ?ServerError
+	OK:            bool,
+	ReplyTag:      ?string,
+	MessageSource: ?string,
+	ResponseType:  ServerResponseType,
+	Data:          any,
+	Error:         ?ServerError
 };
 
 export type ServerResponseType = string;
@@ -35,17 +36,19 @@ export type ServerError = {
 
 export type ServerErrorType = string;
 
+export type ServerResponseHandler = (reply: ServerMessage) => void;
+
 export default class DSClient extends EventTargetClass {
 	// Common backend addresses
 	static HOST_LOCAL      : string = "localhost:7331";
 	static HOST_PRODUCTION : string = "duelsow.eu:7331";
 	static HOST_SAME       : string = ":7331";
 
-	// Export current supported API version
-	static API_VERSION: number = APIVersion;
-
 	// Event types
 	static CONNECTED: string = "connected";
+
+	// Client action APIs
+	static ACTION_STATS: ClientActionType = "stats";
 
 	socket: WebSocket = null;
 
@@ -64,8 +67,8 @@ export default class DSClient extends EventTargetClass {
 			host = "ws://" + host;
 		}
 
-		this.socket = new WebSocket(host, "dsapi-" + APIVersion);
-		this.socket.onmessage = this._handleMessage;
+		this.socket = new WebSocket(host, "ds-wsapi");
+		this.socket.onmessage = this._handleMessage.bind(this);
 		this.socket.onopen = this._trigger.bind(this, DSClient.CONNECTED);
 	}
 
@@ -73,7 +76,22 @@ export default class DSClient extends EventTargetClass {
 		return this.socket.readyState === this.socket.OPEN;
 	}
 
+	callAPI(action: ClientActionType, params: Object, callback: ?ServerResponseHandler = null): void {
+		let request: ClientMessage = {
+			"Tag":        this._newTag(),
+			"ActionType": action,
+			"Params":     params
+		};
+		if (callback !== null) {
+			this._registerCallback(request.Tag, callback);
+		}
+		this.socket.send(JSON.stringify(request));
+	}
+
 	/* Private / Should not be used outside */
+
+	// Callbacks are stored based on the tag of their request
+	_callbacks: {[key: string]: ServerResponseHandler} = {};
 
 	_trigger(eventType: string): void {
 		let event = new Event(eventType);
@@ -82,7 +100,28 @@ export default class DSClient extends EventTargetClass {
 
 	_handleMessage(event: Event): void {
 		let message: ServerMessage = JSON.parse(event.data);
-		//TODO
-		console.log(message);
+		if (window.DEBUG) {
+			console.log(message);
+		}
+		if (message.ReplyTag in this._callbacks) {
+			this._callbacks[message.ReplyTag](message);
+			delete this._callbacks[message.ReplyTag];
+		}
+	}
+
+	_newTag(): string {
+		// Generate random tags until there is one not already in the callback list
+		let id: string = "";
+
+		do {
+			// Cheap way to get random IDs!
+			id = Math.random().toString(32).slice(2);
+		} while (id in this._callbacks);
+
+		return id;
+	}
+
+	_registerCallback(id: string, callback: ServerResponseHandler): void {
+		this._callbacks[id] = callback;
 	}
 }

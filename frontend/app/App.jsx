@@ -3,6 +3,8 @@
 import React    from "react";
 import DSClient from "./DSClient";
 
+import type { ServerMessage } from "./DSClient";
+
 import styles from "./App.module.scss";
 
 type PlayerRank = "RankNewbee" | "RankAverage" | "RankGood" | "RankMaster";
@@ -18,7 +20,7 @@ type PlayerStats = {
 	available: number
 };
 
-const StatPollInterval: number = 5000;
+const StatPollInterval: number = 10000;
 
 class PlayerInfoWidget extends React.Component {
 	static propTypes: Object = {
@@ -61,13 +63,26 @@ class PlayerStatWidget extends React.Component {
 
 	pollerId: ?number = null;
 
+	updateStats(msg: ServerMessage): void {
+		this.setState({
+			waiting:     false,
+			playerStats: {
+				connected: msg.Data.ClientsTotal,
+				available: msg.Data.ClientsAvailable
+			}
+		});
+	}
+
 	pollStats(): void {
 		//TODO
+
+		this.props.client.callAPI(DSClient.ACTION_STATS, {}, this.updateStats.bind(this));
 	}
 
 	componentWillMount(): void {
 		// Add polling
 		this.pollerId = window.setInterval(this.pollStats.bind(this), StatPollInterval);
+		this.pollStats();
 	}
 
 	componentWillUnmount(): void {
