@@ -76,8 +76,6 @@ class PlayerStatWidget extends React.Component {
 	}
 
 	pollStats(): void {
-		//TODO
-
 		this.props.client.callAPI(DSClient.ACTION_STATS, {}, this.updateStats.bind(this));
 	}
 
