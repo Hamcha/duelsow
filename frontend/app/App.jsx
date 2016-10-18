@@ -137,7 +137,7 @@ export default class App extends React.Component {
 	render(): any {
 		let data: PlayerData = {};
 		if (this.state.waiting) {
-			return <main role="main">
+			return <main role="main" style={{"justify-content": "center"}}>
 				<img src="res/duesow-logo.svg" style={{"width": "250px"}} />
 				<h1>Connecting, please wait…</h1>
 			</main>;

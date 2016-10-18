@@ -4,3 +4,97 @@
 	line-height: 1.4em;
 	font-size: 11pt;
 }
+
+.signInForm {
+	margin-top: 2rem;
+
+	table {
+		thead th {
+			font-size: 9pt;
+			text-transform: uppercase;
+			letter-spacing: 1pt;
+			text-align: left;
+			padding: 0 1rem;
+			padding-left: 0;
+			&:first-child { padding-right: 2rem; }
+		}
+
+		tbody {
+
+			td {
+				padding: 0.5rem 1rem;
+				padding-left: 0;
+				&:first-child {	padding-right: 2rem; }
+			}
+
+			input[type="text"] {
+				font-size: 20pt;
+				background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+				border: 0;
+				border-bottom: 2px solid rgba(255,255,255,0.5);
+				padding: 4pt 7pt;
+				border-radius: 5px;
+				color: white;
+				width: 100%;
+				padding-top: 7pt;
+				&:focus {
+					outline: none;
+					background: linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0.4));
+				}
+			}
+
+			input[type="radio"] {
+				display: none;
+			}
+
+			.rankRow {
+				display: flex;
+				flex-flow: row wrap;
+				align-content: stretch;
+			}
+
+			.rankOption {
+				flex-grow: 1;
+				flex-basis: 0;
+				min-width: 40%;
+				font-size: 10pt;
+				text-transform: uppercase;
+				border-radius: 5px;
+				border: 0;
+				border-bottom: 2px solid rgba(255,255,255,0.2);
+				background: linear-gradient(rgba(255,255,255,0.05), rgba(255,255,255,0.1));
+				color: #ccc;
+				font-weight: 300;
+				cursor: pointer;
+				display: inline-block;
+				text-align: center;
+				padding: 0.1rem;
+				margin: 0.1rem;
+			}
+
+			input[type="radio"]:checked + label.rankOption {
+				border-bottom: 2px solid rgba(255,255,255,0.2);
+				background: linear-gradient(rgba(255,255,255,0.3), rgba(255,255,255,0.5));
+				color: white;
+			}
+
+			button {
+				font-size: 15pt;
+				text-transform: uppercase;
+				border-radius: 5px;
+				border: 0;
+				border-bottom: 2px solid rgba(255,255,255,0.4);
+				background: linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0.3));
+				color: white;
+				width: 100%;
+				padding: 0.6rem 0 0.6rem 0;
+				font-weight: 400;
+				cursor: pointer;
+
+				&:hover {
+					background: rgba(255,255,255,0.3);
+				}
+			}
+		}
+	}
+}
