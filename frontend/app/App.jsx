@@ -3,9 +3,11 @@
 import React    from "react";
 import DSClient from "./DSClient";
 
-import type { ServerMessage } from "./DSClient";
+import WelcomePage from "./Pages/WelcomePage";
 
 import styles from "./App.module.scss";
+
+import type { ServerMessage } from "./DSClient";
 
 type PlayerRank = "RankNewbee" | "RankAverage" | "RankGood" | "RankMaster";
 
@@ -146,8 +148,7 @@ export default class App extends React.Component {
 				<div className={styles.logo}><img src="res/duesow-logo.svg" /></div>
 				<PlayerInfoWidget playerData={data} />
 			</header>
-			<section>
-			</section>
+			<WelcomePage />
 		</main>;
 	}
 }
