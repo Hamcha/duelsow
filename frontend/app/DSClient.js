@@ -46,9 +46,15 @@ export default class DSClient extends EventTargetClass {
 
 	// Event types
 	static CONNECTED: string = "connected";
+	static SIGNEDIN: string = "login-ok";
 
 	// Client action APIs
 	static ACTION_STATS: ClientActionType = "stats";
+	static ACTION_SIGN_IN: ClientActionType = "login";
+	static ACTION_JOIN_ROOM: ClientActionType = "room-join";
+
+	// Singleton instance
+	static instance: ?DSClient = null;
 
 	socket: WebSocket = null;
 
@@ -70,6 +76,8 @@ export default class DSClient extends EventTargetClass {
 		this.socket = new WebSocket(host, "ds-wsapi");
 		this.socket.onmessage = this._handleMessage.bind(this);
 		this.socket.onopen = this._trigger.bind(this, DSClient.CONNECTED);
+
+		DSClient.instance = this;
 	}
 
 	isConnected(): bool {
@@ -93,19 +101,36 @@ export default class DSClient extends EventTargetClass {
 	// Callbacks are stored based on the tag of their request
 	_callbacks: {[key: string]: ServerResponseHandler} = {};
 
-	_trigger(eventType: string): void {
-		let event = new Event(eventType);
+	_trigger(eventType: string, data: ?Object = null): void {
+		let event: ?Event = null;
+		if (data === null) {
+			event = new Event(eventType);
+		} else {
+			event = new CustomEvent(eventType, { "detail": data });
+		}
 		this.dispatchEvent(event);
 	}
 
 	_handleMessage(event: Event): void {
 		let message: ServerMessage = JSON.parse(event.data);
+
+		// Write to log if debugging
 		if (window.DEBUG) {
 			console.log(message);
 		}
+
+		// Call callback if present
 		if (message.ReplyTag in this._callbacks) {
 			this._callbacks[message.ReplyTag](message);
 			delete this._callbacks[message.ReplyTag];
+		}
+
+		// Trigger events if needed
+		switch (message.ResponseType) {
+			case "login-ok":
+				this._trigger(DSClient.SIGNEDIN, message.Data);
+				break;
+			default:
 		}
 	}
 

@@ -22,7 +22,9 @@ type PlayerStats = {
 	available: number
 };
 
+// Web client params
 const StatPollInterval: number = 10000;
+const DefaultRoom: string = "warsow";
 
 class PlayerInfoWidget extends React.Component {
 	static propTypes: Object = {
@@ -37,13 +39,14 @@ class PlayerInfoWidget extends React.Component {
 		const ranks: {[key: PlayerRank]: string} = {
 			RankNewbee: "Newbee",
 			RankAverage:"Average",
-			RankGood:   "Good",
+			RankGood:   "Very Good",
 			RankMaster: "Master"
 		};
 		if (!this.props.playerData.signedIn) {
-			return <div className={styles.currentPlayerInfo}>Not signed in</div>;
+			return <div className={styles.currentPlayerInfo}><i>Not signed in</i></div>;
 		}
 		return <div className={styles.currentPlayerInfo}>
+			<i>Signed in as</i>
 			<div className={styles.currentPlayerName}>{this.props.playerData.name}</div>
 			<div className={styles.currentPlayerRank}>{ranks[this.props.playerData.rank]}</div>
 		</div>;
@@ -51,10 +54,6 @@ class PlayerInfoWidget extends React.Component {
 }
 
 class PlayerStatWidget extends React.Component {
-	static propTypes: Object = {
-		client: React.PropTypes.instanceOf(DSClient).isRequired
-	}
-
 	state: {
 		waiting:     bool,
 		playerStats: PlayerStats,
@@ -76,7 +75,7 @@ class PlayerStatWidget extends React.Component {
 	}
 
 	pollStats(): void {
-		this.props.client.callAPI(DSClient.ACTION_STATS, {}, this.updateStats.bind(this));
+		DSClient.instance.callAPI(DSClient.ACTION_STATS, {}, this.updateStats.bind(this));
 	}
 
 	componentWillMount(): void {
@@ -94,7 +93,7 @@ class PlayerStatWidget extends React.Component {
 
 	render(): any {
 		if (this.state.waiting) {
-			return <div className={styles.playerSummary}>Loading summary…</div>;
+			return <div className={styles.playerSummary}><i>Loading summary…</i></div>;
 		}
 		return <div className={styles.playerSummary}>
 			<span className={styles.playerCount}>{this.state.playerStats.connected}</span> players connected<br />
@@ -104,49 +103,70 @@ class PlayerStatWidget extends React.Component {
 }
 
 export default class App extends React.Component {
-	static propTypes: Object = {
-		client: React.PropTypes.instanceOf(DSClient).isRequired
-	}
-
 	state: {
-		waiting: bool
+		connected: bool,
+		player:    PlayerData
 	} = {
-		waiting: true
+		connected: false,
+		player:    { signedIn: false }
 	};
 
 	// Checks DSClient connection status to see if we have connected
 	// to Duelsow's backend server.
-	// If yes, set "waiting" to false, otherwise setup a callback.
+	// If yes, set "connected" to true, otherwise setup a callback.
 	checkDSClientStatus(): void {
-		// Create a function to remove the "waiting" state
-		let remWaitFn: () => void = this.setState.bind(this, { waiting: false }, undefined);
+		// Create a function to set the "connected" state
+		let remWaitFn: () => void = this.setState.bind(this, { connected: true }, undefined);
 
-		if (this.props.client.isConnected()) {
+		if (DSClient.instance.isConnected()) {
 			remWaitFn();
 		} else {
-			this.props.client.addEventListener(DSClient.CONNECTED, remWaitFn);
+			DSClient.instance.addEventListener(DSClient.CONNECTED, remWaitFn);
 		}
 	}
 
+	signIn(e: Event): void {
+		// Set signed in player as current player
+		this.setState({
+			player: {
+				name: e.detail.Player.Name,
+				rank: e.detail.Player.Rank,
+				signedIn: true
+			}
+		});
+
+		// Join default room
+		DSClient.instance.callAPI(DSClient.ACTION_JOIN_ROOM, {"Name": DefaultRoom});
+	}
+
 	componentWillMount(): void {
+		// Handle "connected"
 		this.checkDSClientStatus();
+
+		// Handle "sign in"
+		DSClient.instance.addEventListener(DSClient.SIGNEDIN, this.signIn.bind(this));
 	}
 
 	render(): any {
-		let data: PlayerData = {};
-		if (this.state.waiting) {
+		if (!this.state.connected) {
 			return <main role="main" style={{"justify-content": "center"}}>
 				<img src="res/duesow-logo.svg" style={{"width": "250px"}} />
 				<h1>Connecting, please wait…</h1>
 			</main>;
 		}
+
+		let currentPage = null;
+		if (!this.state.player.signedIn) {
+			currentPage = <WelcomePage />;
+		}
+
 		return <main role="main">
 			<header>
-				<PlayerStatWidget client={this.props.client} />
+				<PlayerStatWidget />
 				<div className={styles.logo}><img src="res/duesow-logo.svg" /></div>
-				<PlayerInfoWidget playerData={data} />
+				<PlayerInfoWidget playerData={this.state.player} />
 			</header>
-			<WelcomePage />
+			{currentPage}
 		</main>;
 	}
 }

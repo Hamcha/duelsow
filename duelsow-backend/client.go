@@ -9,10 +9,10 @@ import (
 type Client struct {
 	conn *websocket.Conn
 
-	SignedIn  bool
-	ClientId  int
-	Info      PlayerInfo
-	Available bool
+	SignedIn bool
+	ClientId int
+	Info     PlayerInfo
+	Busy     bool
 }
 
 func handleClient(conn *websocket.Conn) {
@@ -60,6 +60,43 @@ func (c *Client) HandleMessage(message ClientMessage) {
 			ResponseType: SRTStats,
 			ReplyTag:     &message.Tag,
 			Data:         hub.Stats(),
+		})
+	case CATLogIn:
+		name, nameok := message.Params["Name"]
+		rank, rankok := message.Params["Rank"]
+		if !nameok || !rankok {
+			// Wrong format!
+			c.conn.WriteJSON(ServerMessage{
+				OK:           false,
+				ResponseType: SRTCmdError,
+				ReplyTag:     &message.Tag,
+				Error: &ServerError{
+					ErrorType: SETWrongFormat,
+					Message:   "Login parameters are specified in the wrong format",
+				},
+			})
+			return
+		}
+
+		// Set player info
+		c.Info = PlayerInfo{
+			Name: name,
+			Rank: rank,
+		}
+		c.SignedIn = true
+		c.Busy = false
+
+		// Add player to hub
+		hub.AddClient(c)
+
+		// Send successful login
+		c.conn.WriteJSON(ServerMessage{
+			OK:           true,
+			ResponseType: SRTSignedIn,
+			ReplyTag:     &message.Tag,
+			Data: ServerLoginData{
+				Player: c.Info,
+			},
 		})
 	default:
 		c.conn.WriteJSON(ServerMessage{

@@ -8,9 +8,8 @@ type ClientActionType string
 
 const (
 	// Hub/Auth actions
-	CATLogIn  ClientActionType = "login"
-	CATLogOut ClientActionType = "logout"
-	CATStats  ClientActionType = "stats"
+	CATLogIn ClientActionType = "login"
+	CATStats ClientActionType = "stats"
 
 	// Room actions
 	CATRoomJoin ClientActionType = "room-join"
@@ -20,16 +19,12 @@ const (
 type ClientMessage struct {
 	Tag        string
 	ActionType ClientActionType
-	Params     interface{}
+	Params     map[string]string
 }
 
 type PlayerInfo struct {
 	Name string
 	Rank string
-}
-
-type LoginParams struct {
-	Player PlayerInfo
 }
 
 //
@@ -41,9 +36,13 @@ type ServerResponseType string
 const (
 	// Server messages
 	SRTGreeting ServerResponseType = "greet"
+
+	SRTSignedIn ServerResponseType = "login-ok"
+
 	SRTRoomJoin ServerResponseType = "room-join"
 	SRTRoomPart ServerResponseType = "room-part"
-	SRTStats    ServerResponseType = "stats"
+
+	SRTStats ServerResponseType = "stats"
 
 	// Errors
 	SRTCmdError   ServerResponseType = "error-cmd"
@@ -53,8 +52,9 @@ const (
 type ServerErrorType string
 
 const (
-	SETReadError  ServerErrorType = "read error"
-	SETUnknownCmd ServerErrorType = "command not recognized"
+	SETReadError   ServerErrorType = "read error"
+	SETUnknownCmd  ServerErrorType = "command not recognized"
+	SETWrongFormat ServerErrorType = "wrong param format"
 )
 
 type ServerMessage struct {
@@ -75,9 +75,8 @@ type ServerGreetingData struct {
 	Rooms []string
 }
 
-type ServerStatsData struct {
-	ClientsTotal     int
-	ClientsAvailable int
+type ServerLoginData struct {
+	Player PlayerInfo
 }
 
 type ServerRoomJoinData struct {
@@ -87,4 +86,9 @@ type ServerRoomJoinData struct {
 
 type ServerRoomPartData struct {
 	ClientId int
+}
+
+type ServerStatsData struct {
+	ClientsTotal     int
+	ClientsAvailable int
 }
