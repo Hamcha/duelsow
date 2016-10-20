@@ -65,6 +65,7 @@ func (c *Client) HandleMessage(message ClientMessage) {
 		c.conn.WriteJSON(ServerMessage{
 			OK:           false,
 			ResponseType: SRTCmdError,
+			ReplyTag:     &message.Tag,
 			Error: &ServerError{
 				ErrorType: SETUnknownCmd,
 				Message:   fmt.Sprintf("Command not recognized: %s", message.ActionType),
