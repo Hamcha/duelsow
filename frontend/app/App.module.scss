@@ -19,39 +19,20 @@ header {
 	justify-content: center;
 	align-items: center;
 
-	& > * {
-		flex: 1;
-	}
+	& > * { flex: 1; }
 
-	div.playerSummary {
-		text-align: right;
-
-		span.playerCount {
-			font-size: 1.1em;
-			font-weight: bold;
-		}
-	}
 	div.logo {
 		text-align: center;
 		margin: 1rem 4rem;
 
 		img { width: 210px; }
 	}
+}
 
+section.mainPage {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
 
-	div.currentPlayerInfo {
-
-		i {
-			font-size: 10pt;
-		}
-
-		.currentPlayerName {
-			margin: 5pt 0 2pt 0; padding: 0;
-			font-size: 15pt;
-			font-weight: bold;
-		}
-		.currentPlayerRank {
-			color: #bbb;
-		}
-	}
 }

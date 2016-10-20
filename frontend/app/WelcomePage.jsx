@@ -1,9 +1,9 @@
 /* @flow */
 
 import React    from "react";
-import DSClient from "../DSClient";
+import DSClient from "./DSClient";
 
-import type { ServerMessage } from "../DSClient";
+import type { ServerMessage } from "./DSClient";
 
 import styles from "./WelcomePage.module.scss";
 

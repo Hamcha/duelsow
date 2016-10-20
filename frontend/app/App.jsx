@@ -3,11 +3,15 @@
 import React    from "react";
 import DSClient from "./DSClient";
 
-import WelcomePage from "./Pages/WelcomePage";
+import { PlayerStatWidget, PlayerInfoWidget } from "./HeaderWidgets";
+import WelcomePage from "./WelcomePage";
+import ChatWindow from "./ChatWindow";
 
 import styles from "./App.module.scss";
 
-import type { ServerMessage } from "./DSClient";
+// Web client params
+const StatPollInterval: number = 10000;
+const DefaultRoom: string = "warsow";
 
 type PlayerRank = "RankNewbee" | "RankAverage" | "RankGood" | "RankMaster";
 
@@ -17,90 +21,6 @@ type PlayerData = {
 	rank: PlayerRank
 };
 
-type PlayerStats = {
-	connected: number,
-	available: number
-};
-
-// Web client params
-const StatPollInterval: number = 10000;
-const DefaultRoom: string = "warsow";
-
-class PlayerInfoWidget extends React.Component {
-	static propTypes: Object = {
-		playerData: React.PropTypes.object
-	};
-
-	defaultProps: Object = {
-		playerData: { signedIn: false }
-	};
-
-	render(): any {
-		const ranks: {[key: PlayerRank]: string} = {
-			RankNewbee: "Newbee",
-			RankAverage:"Average",
-			RankGood:   "Very Good",
-			RankMaster: "Master"
-		};
-		if (!this.props.playerData.signedIn) {
-			return <div className={styles.currentPlayerInfo}><i>Not signed in</i></div>;
-		}
-		return <div className={styles.currentPlayerInfo}>
-			<i>Signed in as</i>
-			<div className={styles.currentPlayerName}>{this.props.playerData.name}</div>
-			<div className={styles.currentPlayerRank}>{ranks[this.props.playerData.rank]}</div>
-		</div>;
-	}
-}
-
-class PlayerStatWidget extends React.Component {
-	state: {
-		waiting:     bool,
-		playerStats: PlayerStats,
-	} = {
-		waiting:     true,
-		playerStats: {}
-	};
-
-	pollerId: ?number = null;
-
-	updateStats(msg: ServerMessage): void {
-		this.setState({
-			waiting:     false,
-			playerStats: {
-				connected: msg.Data.ClientsTotal,
-				available: msg.Data.ClientsAvailable
-			}
-		});
-	}
-
-	pollStats(): void {
-		DSClient.instance.callAPI(DSClient.ACTION_STATS, {}, this.updateStats.bind(this));
-	}
-
-	componentWillMount(): void {
-		// Add polling
-		this.pollerId = window.setInterval(this.pollStats.bind(this), StatPollInterval);
-		this.pollStats();
-	}
-
-	componentWillUnmount(): void {
-		// Remove polling
-		if (this.pollerId !== null) {
-			window.clearInterval(this.pollerId);
-		}
-	}
-
-	render(): any {
-		if (this.state.waiting) {
-			return <div className={styles.playerSummary}><i>Loading summary…</i></div>;
-		}
-		return <div className={styles.playerSummary}>
-			<span className={styles.playerCount}>{this.state.playerStats.connected}</span> players connected<br />
-			<span className={styles.playerCount}>{this.state.playerStats.available}</span> available for dueling
-		</div>;
-	}
-}
 
 export default class App extends React.Component {
 	state: {
@@ -134,9 +54,6 @@ export default class App extends React.Component {
 				signedIn: true
 			}
 		});
-
-		// Join default room
-		DSClient.instance.callAPI(DSClient.ACTION_JOIN_ROOM, {"Name": DefaultRoom});
 	}
 
 	componentWillMount(): void {
@@ -149,7 +66,7 @@ export default class App extends React.Component {
 
 	render(): any {
 		if (!this.state.connected) {
-			return <main role="main" style={{"justify-content": "center"}}>
+			return <main role="main">
 				<img src="res/duesow-logo.svg" style={{"width": "250px"}} />
 				<h1>Connecting, please wait…</h1>
 			</main>;
@@ -158,11 +75,15 @@ export default class App extends React.Component {
 		let currentPage = null;
 		if (!this.state.player.signedIn) {
 			currentPage = <WelcomePage />;
+		} else {
+			currentPage = <section id={styles.mainPage}>
+				<ChatWindow defaultRoom={DefaultRoom} self={this.state.player.name} />
+			</section>;
 		}
 
 		return <main role="main">
 			<header>
-				<PlayerStatWidget />
+				<PlayerStatWidget pollInterval={StatPollInterval} />
 				<div className={styles.logo}><img src="res/duesow-logo.svg" /></div>
 				<PlayerInfoWidget playerData={this.state.player} />
 			</header>
