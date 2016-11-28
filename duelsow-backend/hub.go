@@ -2,12 +2,12 @@ package main
 
 type Hub struct {
 	Clients []*Client
-	Rooms   map[string]Room
+	Rooms   map[string]*Room
 }
 
 func NewHub() *Hub {
 	return &Hub{
-		Rooms: make(map[string]Room),
+		Rooms: make(map[string]*Room),
 	}
 }
 
@@ -33,6 +33,16 @@ func (h *Hub) RoomList() []string {
 		list = append(list, name)
 	}
 	return list
+}
+
+func (h *Hub) GetRoom(name string) *Room {
+	_, ok := h.Rooms[name]
+	if !ok {
+		h.Rooms[name] = &Room{
+			Name: name,
+		}
+	}
+	return h.Rooms[name]
 }
 
 func (h *Hub) Stats() ServerStatsData {
@@ -86,6 +96,14 @@ func (r *Room) RemoveClient(c *Client) bool {
 
 func (r *Room) Broadcast(msg ServerMessage) {
 	broadcast(msg, &r.Clients)
+}
+
+func (r *Room) PlayerList() (clients map[int]PlayerInfo) {
+	clients = make(map[int]PlayerInfo)
+	for _, c := range r.Clients {
+		clients[c.ClientId] = c.Info
+	}
+	return
 }
 
 // "Generic" functions follow, should not be used outside of this file

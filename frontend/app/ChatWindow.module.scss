@@ -1,0 +1,11 @@
+.root {
+	background: linear-gradient(rgba(10,20,30,0.5), rgba(30,40,50,0.5));
+	flex: 1;
+	display: flex;
+	border-radius: 10px;
+	border: 1px solid rgba(70,80,90,0.8);
+}
+
+.playerList {
+	flex: 1;
+}

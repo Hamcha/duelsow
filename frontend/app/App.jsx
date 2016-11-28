@@ -21,7 +21,6 @@ type PlayerData = {
 	rank: PlayerRank
 };
 
-
 export default class App extends React.Component {
 	state: {
 		connected: bool,

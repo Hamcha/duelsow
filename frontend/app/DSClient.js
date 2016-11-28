@@ -46,12 +46,13 @@ export default class DSClient extends EventTargetClass {
 
 	// Event types
 	static CONNECTED: string = "connected";
-	static SIGNEDIN: string = "login-ok";
+	static SIGNEDIN: string = "login:ok";
 
 	// Client action APIs
-	static ACTION_STATS: ClientActionType = "stats";
-	static ACTION_SIGN_IN: ClientActionType = "login";
-	static ACTION_JOIN_ROOM: ClientActionType = "room-join";
+	static ACTION_STATS: ClientActionType = "general:stats";
+	static ACTION_SIGN_IN: ClientActionType = "auth:login";
+	static ACTION_JOIN_ROOM: ClientActionType = "room:join";
+	static ACTION_PART_ROOM: ClientActionType = "room:part";
 
 	// Singleton instance
 	static instance: ?DSClient = null;
@@ -127,7 +128,7 @@ export default class DSClient extends EventTargetClass {
 
 		// Trigger events if needed
 		switch (message.ResponseType) {
-			case "login-ok":
+			case DSClient.SIGNEDIN:
 				this._trigger(DSClient.SIGNEDIN, message.Data);
 				break;
 			default:

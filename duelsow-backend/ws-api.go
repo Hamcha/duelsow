@@ -8,12 +8,12 @@ type ClientActionType string
 
 const (
 	// Hub/Auth actions
-	CATLogIn ClientActionType = "login"
-	CATStats ClientActionType = "stats"
+	CATLogIn ClientActionType = "auth:login"
+	CATStats ClientActionType = "general:stats"
 
 	// Room actions
-	CATRoomJoin ClientActionType = "room-join"
-	CATRoomPart ClientActionType = "room-part"
+	CATRoomJoin ClientActionType = "room:join"
+	CATRoomPart ClientActionType = "room:part"
 )
 
 type ClientMessage struct {
@@ -37,24 +37,29 @@ const (
 	// Server messages
 	SRTGreeting ServerResponseType = "greet"
 
-	SRTSignedIn ServerResponseType = "login-ok"
+	SRTSignedIn ServerResponseType = "login:ok"
 
-	SRTRoomJoin ServerResponseType = "room-join"
-	SRTRoomPart ServerResponseType = "room-part"
+	SRTRoomJoin ServerResponseType = "room:join"
+	SRTRoomPart ServerResponseType = "room:part"
+
+	SRTRoomJoined ServerResponseType = "room:joined"
+	SRTRoomParted ServerResponseType = "room:parted"
 
 	SRTStats ServerResponseType = "stats"
 
 	// Errors
-	SRTCmdError   ServerResponseType = "error-cmd"
-	SRTFatalError ServerResponseType = "error-fatal"
+	SRTCmdError   ServerResponseType = "error:cmd"
+	SRTFatalError ServerResponseType = "error:fatal"
 )
 
 type ServerErrorType string
 
 const (
-	SETReadError   ServerErrorType = "read error"
-	SETUnknownCmd  ServerErrorType = "command not recognized"
-	SETWrongFormat ServerErrorType = "wrong param format"
+	SETReadError     ServerErrorType = "read error"
+	SETUnknownCmd    ServerErrorType = "command not recognized"
+	SETWrongFormat   ServerErrorType = "wrong param format"
+	SETAlreadyInRoom ServerErrorType = "already inside room"
+	SETNotInRoom     ServerErrorType = "not in room"
 )
 
 type ServerMessage struct {
@@ -80,12 +85,23 @@ type ServerLoginData struct {
 }
 
 type ServerRoomJoinData struct {
+	RoomName string
 	ClientId int
 	Player   PlayerInfo
 }
 
 type ServerRoomPartData struct {
+	RoomName string
 	ClientId int
+}
+
+type ServerRoomJoinedData struct {
+	RoomName string
+	Players  map[int]PlayerInfo
+}
+
+type ServerRoomPartedData struct {
+	RoomName string
 }
 
 type ServerStatsData struct {
